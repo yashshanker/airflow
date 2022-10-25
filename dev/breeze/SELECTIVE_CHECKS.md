@@ -108,8 +108,8 @@ The selective check outputs available are described below:
 
 | Output                             | Meaning of the output                                                                                  | Example value                                                 |
 |------------------------------------|--------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
-| all-python-versions                | List of all python versions there are available in the form of JSON array                              | ['3.7', '3.8', '3.9', '3.10']                                 |
-| all-python-versions-list-as-string | List of all python versions there are available in the form of space separated string                  | 3.7 3.8 3.9 3.10                                              |
+| all-python-versions                | List of all python versions there are available in the form of JSON array                              | ['3.7', '3.8', '3.9', '3.10', '3.11']                         |
+| all-python-versions-list-as-string | List of all python versions there are available in the form of space separated string                  | 3.7 3.8 3.9 3.10 3.11                                         |
 | basic-checks-only                  | Whether to run all static checks ("false") or only basic set of static checks ("true")                 | false                                                         |
 | cache-directive                    | Which cache should be be used for images ("registry", "local" , "disabled")                            | registry                                                      |
 | debug-resources                    | Whether resources usage should be printed during parallel job execution ("true"/ "false")              | false                                                         |

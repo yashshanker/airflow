@@ -120,6 +120,12 @@ dependencies:
   # Google bigtable client require protobuf <= 3.20.0. We can remove the limitation
   # when this limitation is removed
   - protobuf<=3.20.0
+# Excluded because bigquery and a number of dependent libraries are not compatible with 3.11 yet
+# See https://pyreadiness.org/3.11/. Also some of Google libraries are in pretty ancient
+# version (pre 2.0.0) and they MUST be migrated in order to add 3.11 support
+# This is tracked in https://github.com/apache/airflow/issues/27292
+excluded-python-versions:
+  - "3.11"
 
 integrations:
   - integration-name: Google Analytics360

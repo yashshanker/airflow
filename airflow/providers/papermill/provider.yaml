@@ -40,6 +40,13 @@ dependencies:
   - papermill[all]>=1.2.1
   - scrapbook[all]
 
+# Excluded because papermill and a number of dependent libraries are not compatible
+# with 3.11 yet See https://pyreadiness.org/3.11/. (Pyarrow is one of the important ones)
+# See for issue that tracks it https://github.com/nteract/papermill/issues/700
+excluded-python-versions:
+  - "3.11"
+
+
 integrations:
   - integration-name: Papermill
     external-doc-url: https://github.com/nteract/papermill

@@ -47,6 +47,12 @@ dependencies:
   - databricks-sql-connector>=2.0.0, <3.0.0
   - aiohttp>=3.6.3, <4
 
+# Excluded because databricks-sql-connector and a number of dependent libraries are not compatible
+# with 3.11 yet See https://pyreadiness.org/3.11/. (Pyarrow is one of the important ones)
+# See https://github.com/databricks/databricks-sql-python/issues/59 for issue that tracks it
+excluded-python-versions:
+  - "3.11"
+
 integrations:
   - integration-name: Databricks
     external-doc-url: https://databricks.com/

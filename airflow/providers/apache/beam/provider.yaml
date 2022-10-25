@@ -39,6 +39,11 @@ dependencies:
   - apache-airflow>=2.3.0
   - apache-beam>=2.33.0
 
+# Excluded because apache-beam and a number of dependent libraries are not
+# compatible with 3.11 yet. See https://github.com/apache/beam/issues/23848
+excluded-python-versions:
+  - "3.11"
+
 integrations:
   - integration-name: Apache Beam
     external-doc-url: https://beam.apache.org/

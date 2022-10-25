@@ -54,8 +54,7 @@ version = "2.5.0.dev0"
 AIRFLOW_SOURCES_ROOT = Path(__file__).parent.resolve()
 PROVIDERS_ROOT = AIRFLOW_SOURCES_ROOT / "airflow" / "providers"
 
-CROSS_PROVIDERS_DEPS = "cross-providers-deps"
-DEPS = "deps"
+CURRENT_PYTHON_VERSION = f"{sys.version_info.major}.{sys.version_info.minor}"
 
 
 #
@@ -65,7 +64,17 @@ DEPS = "deps"
 #
 def fill_provider_dependencies() -> dict[str, dict[str, list[str]]]:
     try:
-        return json.loads((AIRFLOW_SOURCES_ROOT / "generated" / "provider_dependencies.json").read_text())
+        dependencies = json.loads(
+            (AIRFLOW_SOURCES_ROOT / "generated" / "provider_dependencies.json").read_text()
+        )
+        for key in list(dependencies.keys()):
+            if CURRENT_PYTHON_VERSION in dependencies[key]["excluded-python-versions"]:
+                print(
+                    f"Excluding provider {key} because it is not "
+                    f"compatible with Python {CURRENT_PYTHON_VERSION}"
+                )
+                del dependencies[key]
+        return dependencies
     except Exception as e:
         print(f"Exception while loading provider dependencies {e}")
         # we can ignore loading dependencies when they are missing - they are only used to generate
@@ -413,7 +422,10 @@ devel_only = [
 
 
 def get_provider_dependencies(provider_name: str) -> list[str]:
-    return PROVIDER_DEPENDENCIES[provider_name][DEPS]
+    provider_dict = PROVIDER_DEPENDENCIES.get(provider_name)
+    if provider_dict:
+        return PROVIDER_DEPENDENCIES[provider_name]["deps"]
+    return []
 
 
 def get_unique_dependency_list(req_list_iterable: Iterable[list[str]]):
@@ -449,7 +461,7 @@ devel_hadoop = get_unique_dependency_list(
 )
 
 # Those are all additional extras which do not have their own 'providers'
-# The 'apache.atlas' and 'apache.webhdfs' are extras that provide additional libraries
+# The 'apache.atlas' and 'apache.webhdfs' are extras that provide additional libraries,
 # but they do not have separate providers (yet?), they are merely there to add extra libraries
 # That can be used in custom python/bash operators.
 ADDITIONAL_EXTRAS_DEPENDENCIES: dict[str, list[str]] = {
@@ -479,12 +491,17 @@ CORE_EXTRAS_DEPENDENCIES: dict[str, list[str]] = {
     "virtualenv": virtualenv,
 }
 
+for key in list(CORE_EXTRAS_DEPENDENCIES.keys()):
+    if not CORE_EXTRAS_DEPENDENCIES[key]:
+        print(f"Removing extra {key} as it has been excluded")
+        del CORE_EXTRAS_DEPENDENCIES[key]
+
 EXTRAS_DEPENDENCIES: dict[str, list[str]] = deepcopy(CORE_EXTRAS_DEPENDENCIES)
 
 
 def add_extras_for_all_providers() -> None:
     for (provider_name, provider_dict) in PROVIDER_DEPENDENCIES.items():
-        EXTRAS_DEPENDENCIES[provider_name] = provider_dict[DEPS]
+        EXTRAS_DEPENDENCIES[provider_name] = provider_dict["deps"]
 
 
 def add_additional_extras() -> None:
@@ -541,8 +558,9 @@ def add_extras_for_all_deprecated_aliases() -> None:
     for alias, extra in EXTRAS_DEPRECATED_ALIASES.items():
         dependencies = EXTRAS_DEPENDENCIES.get(extra) if extra != "" else []
         if dependencies is None:
-            raise Exception(f"The extra {extra} is missing for deprecated alias {alias}")
-        EXTRAS_DEPENDENCIES[alias] = dependencies
+            print(f"Skipping adding {alias} alias because {extra} has been excluded")
+        else:
+            EXTRAS_DEPENDENCIES[alias] = dependencies
 
 
 def add_all_deprecated_provider_packages() -> None:
@@ -595,8 +613,12 @@ ALL_DB_PROVIDERS = [
 def get_all_db_dependencies() -> list[str]:
     _all_db_reqs: set[str] = set()
     for provider in ALL_DB_PROVIDERS:
-        for req in PROVIDER_DEPENDENCIES[provider][DEPS]:
-            _all_db_reqs.add(req)
+        dependencies = PROVIDER_DEPENDENCIES.get(provider)
+        if dependencies is None:
+            print(f"Not adding {provider} dependencies to all_db as it has been excluded")
+        else:
+            for req in PROVIDER_DEPENDENCIES[provider]["deps"]:
+                _all_db_reqs.add(req)
     return list(_all_db_reqs)
 
 

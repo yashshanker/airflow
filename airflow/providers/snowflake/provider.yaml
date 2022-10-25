@@ -51,6 +51,13 @@ dependencies:
   - snowflake-connector-python>=2.4.1
   - snowflake-sqlalchemy>=1.1.0
 
+# Excluded because snowflake connector python and a number of dependent libraries are not
+# compatible with 3.11 yet. See https://pyreadiness.org/3.11/. One of the important dependencies
+# is Pyarrow: https://github.com/apache/arrow/pull/14499 but the
+# https://github.com/snowflakedb/snowflake-connector-python/issues/1289 is the issue
+excluded-python-versions:
+  - "3.11"
+
 integrations:
   - integration-name: Snowflake
     external-doc-url: https://snowflake.com/
